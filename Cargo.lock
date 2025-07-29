@@ -47,11 +47,13 @@ version = "0.1.0"
 dependencies = [
  "axum",
  "chrono",
+ "dotenvy",
  "jsonwebtoken",
  "once_cell",
  "regex",
  "serde",
  "serde_json",
+ "shared",
  "thiserror",
  "tokio",
  "tracing",
@@ -248,6 +250,12 @@ dependencies = [
  "quote",
  "syn",
 ]
+
+[[package]]
+name = "dotenvy"
+version = "0.15.7"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1aaf95b3e5c8f23aa320147307562d361db0ae0d51242340f558153b4eb2439b"
 
 [[package]]
 name = "fnv"
@@ -913,6 +921,12 @@ dependencies = [
 [[package]]
 name = "shared"
 version = "0.1.0"
+dependencies = [
+ "chrono",
+ "dotenvy",
+ "jsonwebtoken",
+ "serde",
+]
 
 [[package]]
 name = "shlex"

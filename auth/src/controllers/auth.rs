@@ -1,8 +1,9 @@
-use crate::controllers::helpers::{AuthError, AuthResponse};
+use crate::helpers::errors::{map_validation_errors, AuthError};
+use crate::helpers::responses::AuthResponse;
+use crate::helpers::validators::AuthRequest;
+use crate::services::{auth, jwt};
 use axum::{response::IntoResponse, Json};
 use validator::Validate;
-
-use super::helpers::{map_validation_errors, AuthRequest};
 
 pub async fn login(Json(payload): Json<AuthRequest>) -> impl IntoResponse {
     if let Err(error) = payload.validate() {
@@ -12,7 +13,18 @@ pub async fn login(Json(payload): Json<AuthRequest>) -> impl IntoResponse {
             }
         }
     }
-    AuthResponse::LoginSuccess.into_response()
+
+    let user = match auth::login_user(payload.email, payload.password) {
+        Err(error) => return AuthResponse::AuthError(error).into_response(),
+        Ok(u) => u,
+    };
+
+    let jwt = jwt::generate_jwt_token(&user.id.to_string()).map_err(|_| AuthError::UserNotFound);
+
+    match jwt {
+        Err(error) => AuthResponse::AuthError(error).into_response(),
+        Ok(token) => AuthResponse::LoginSuccess(token).into_response(),
+    }
 }
 
 pub async fn register(Json(payload): Json<AuthRequest>) -> impl IntoResponse {
@@ -21,5 +33,16 @@ pub async fn register(Json(payload): Json<AuthRequest>) -> impl IntoResponse {
             return AuthResponse::AuthError(auth_error).into_response();
         }
     }
-    AuthResponse::RegisterSuccess.into_response()
+
+    let user = match auth::register_user(payload.email, payload.password) {
+        Err(error) => return AuthResponse::AuthError(error).into_response(),
+        Ok(u) => u,
+    };
+
+    let jwt = jwt::generate_jwt_token(&user.id.to_string()).map_err(|_| AuthError::UserNotFound);
+
+    match jwt {
+        Err(error) => AuthResponse::AuthError(error).into_response(),
+        Ok(token) => AuthResponse::RegisterSuccess(token).into_response(),
+    }
 }

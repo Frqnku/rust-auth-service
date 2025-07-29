@@ -1,6 +1,9 @@
 use axum::Router;
 mod controllers;
 mod routes;
+mod repositories;
+mod services;
+mod helpers;
 
 #[tokio::main]
 async fn main() {
