@@ -1,31 +1,45 @@
-use once_cell::sync::Lazy;
-use std::sync::Mutex;
+use serde::{Deserialize, Serialize};
+use sqlx::postgres::PgPool;
+use uuid::Uuid;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize, sqlx::FromRow)]
 pub struct User {
-    pub id: i32,
+    pub id: Uuid,
     pub email: String,
     pub password: String,
 }
 
-static GLOBAL_DB: Lazy<Mutex<Vec<User>>> = Lazy::new(|| Mutex::new(Vec::new()));
-
-pub fn add_record(record: User) -> Result<(), String> {
-    let mut db = GLOBAL_DB.lock().unwrap();
-    db.push(record);
-    // Need to handle error case if the record cannot be added
-
-    Ok(())
+#[derive(Debug, Clone, Serialize, Deserialize, sqlx::FromRow)]
+pub struct NewUser {
+    pub email: String,
+    pub password: String,
 }
 
-pub fn show_db() -> Vec<User> {
-    let db = GLOBAL_DB.lock().unwrap();
-    println!("DB actuelle : {:?}", *db);
-    db.clone()
+pub async fn add_user(user: NewUser, db: &PgPool) -> Result<User, sqlx::Error> {
+    let user = sqlx::query_as!(
+        User,
+        r#"
+        INSERT INTO users (email, password) 
+        VALUES ($1, $2)
+        RETURNING id, email, password
+        "#,
+        user.email,
+        user.password
+    )
+    .fetch_one(db)
+    .await?;
+
+    Ok(user)
 }
 
-pub fn get_user_by_email(email: &str) -> Option<User> {
-    let db = GLOBAL_DB.lock().unwrap();
-    let found = db.iter().find(|user| user.email == email);
-    found.cloned()
+pub async fn get_user_by_email(email: &str, db: &PgPool) -> Option<User> {
+    let user = sqlx::query_as!(
+        User,
+        "SELECT id, email, password FROM users WHERE email = $1",
+        email
+    )
+    .fetch_optional(db)
+    .await
+    .ok()?;
+    user
 }

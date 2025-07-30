@@ -2,6 +2,7 @@ use chrono::{Duration, Utc};
 use jsonwebtoken::{encode, errors::Error, EncodingKey, Header};
 use serde::{Deserialize, Serialize};
 use shared::jwt::get_jwt_secret;
+use uuid::Uuid;
 
 #[derive(Debug, Serialize, Deserialize)]
 struct Claims {
@@ -9,7 +10,7 @@ struct Claims {
     exp: usize,
 }
 
-pub fn generate_jwt_token(user_id: &str) -> Result<String, Error> {
+pub fn generate_jwt_token(user_id: Uuid) -> Result<String, Error> {
     let expiration = Utc::now()
         .checked_add_signed(Duration::hours(24))
         .unwrap()
