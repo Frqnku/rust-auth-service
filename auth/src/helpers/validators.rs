@@ -1,6 +1,6 @@
 use regex::Regex;
-use serde::{Deserialize};
-use validator::{ValidationError};
+use serde::Deserialize;
+use validator::ValidationError;
 use validator_derive::Validate;
 
 fn contains_digit(password: &str) -> Result<(), ValidationError> {

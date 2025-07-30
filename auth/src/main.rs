@@ -10,7 +10,7 @@ use shared::database::init_db;
 async fn main() {
     tracing_subscriber::fmt::init();
 
-    let db_pool    = init_db().await;
+    let db_pool = init_db().await;
 
     let app = Router::new()
         .nest("/auth", routes::auth::auth_routes())
