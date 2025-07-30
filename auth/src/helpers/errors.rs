@@ -8,6 +8,7 @@ pub enum AuthError {
     PasswordNotStrongEnough,
     UserAlreadyExists,
     DatabaseError,
+    HashingError,
 }
 
 impl AuthError {
@@ -18,6 +19,7 @@ impl AuthError {
             AuthError::PasswordNotStrongEnough => "password_not_strong_enough",
             AuthError::UserAlreadyExists => "user_already_exists",
             AuthError::DatabaseError => "database_error",
+            AuthError::HashingError => "hashing_error",
         }
     }
 
@@ -32,6 +34,7 @@ impl AuthError {
             AuthError::DatabaseError => {
                 "Une erreur est survenue lors de l'accès à la base de données."
             }
+            AuthError::HashingError => "Une erreur est survenue lors du hachage du mot de passe.",
         }
     }
 
@@ -41,6 +44,7 @@ impl AuthError {
             AuthError::UserAlreadyExists => StatusCode::CONFLICT,
             AuthError::UserNotFound => StatusCode::UNAUTHORIZED,
             AuthError::DatabaseError => StatusCode::INTERNAL_SERVER_ERROR,
+            AuthError::HashingError => StatusCode::INTERNAL_SERVER_ERROR,
         }
     }
 }
