@@ -19,7 +19,7 @@ pub async fn add_user(user: NewUser, db: &PgPool) -> Result<User, sqlx::Error> {
     let user = sqlx::query_as!(
         User,
         r#"
-        INSERT INTO users (email, password) 
+        INSERT INTO users (email, password)
         VALUES ($1, $2)
         RETURNING id, email, password
         "#,
